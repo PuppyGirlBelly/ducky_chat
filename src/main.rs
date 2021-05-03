@@ -1,27 +1,66 @@
-use std::io::{stdout, Write};
+use std::io::{stdout, stdin, Write};
+use std::{thread, time::Duration, error::Error};
+use signal_hook::{iterator::Signals, consts::signal::SIGINT};
 use crossterm::{
-    terminal, Result, ExecutableCommand,
+    queue, execute, terminal, cursor, style::{self, Color, Colorize}, Result, ExecutableCommand,
+    // terminal, Result, ExecutableCommand,
 };
 use ducky::messages::Message;
 
 fn main() -> Result<()> {
+    let mut signals = Signals::new(&[SIGINT])?;
     let mut stdout = stdout();
+    let mut input: String = String::new();
+    let user_color = crossterm::style::Color::Blue;
+    let duck_color = crossterm::style::Color::Yellow;
+
+    thread::spawn(move || {
+        for sig in signals.forever() {
+            println!("Received signal {:?}", sig);
+            // running = false;
+        }
+    });
 
     stdout.execute(terminal::Clear(terminal::ClearType::All))?;
 
-    for i in 0..10 {
-        let mut message = Message::new("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.", "Ducky", 'l');
+    let mut message = Message::new("Welcome to Ducky Chat", "Info", 'l');
+    message.color = style::Color::Grey;
 
-        if i%2 == 1 {
-            message.side = 'r';
-            message.user = "user".to_string();
-            message.format_text("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book");
+    while &input != "quit\n" {
+        ducky::draw_message(&mut stdout, &message)?;
+        stdout.flush()?;
+        input.clear();
+
+        if true {
+            message.side = 'l';
+            message.user = "duck".to_string();
+            message.color = duck_color;
+            message.format_text("quak");
+
+            ducky::draw_message(&mut stdout, &message)?;
+            stdout.flush()?;
         }
 
-        ducky::draw_message(&mut stdout, &message)?;
+        if true {
+            execute!(stdout, cursor::MoveToNextLine(1),
+                             cursor::SavePosition,
+                             cursor::MoveRight(1),
+                             style::Print("> "),
+                             terminal::DisableLineWrap)?;
+            stdin().read_line(&mut input).expect("error: unable to read user input");
+            execute!(stdout, cursor::RestorePosition,
+                             terminal::Clear(terminal::ClearType::CurrentLine),
+                             terminal::EnableLineWrap)?;
+            stdout.flush()?;
 
-        stdout.flush()?;
+            message.side = 'r';
+            message.user = "user".to_string();
+            message.color = user_color;
+            message.format_text(&input);
+        }
     }
 
     Ok(())
 }
+
+

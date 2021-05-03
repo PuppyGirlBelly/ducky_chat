@@ -41,21 +41,41 @@ pub mod messages{
             let (cols, rows) = crossterm::terminal::size().unwrap();
 
             // Determine the maximum size of each box (60% of the screen)
-            let max_width: u16 = (cols/2) + (cols/10);
+            let max_width: usize = ((cols/2) + (cols/10)).into();
+            let text_width: usize = text.chars().count();
+            let name_width: usize = self.user.chars().count() + 1;
+
             self.y = rows - 3; // Place boxes at the bottom of the screen (plus space for input)
 
             // If text is bigger than max width, wrap it into lines; and adjust hight and width
-            if text.chars().count() > max_width as usize {
+            if text_width > max_width {
                 let options = textwrap::Options::new(max_width as usize);
                 self.text = textwrap::fill(text, options);
                 self.height = self.text.lines().count() as u16;
-                self.width = max_width; // Added to prevent bugs during testing
+                self.width = max_width as u16; // Added to prevent bugs during testing
+            // Check if the username is longer than the text size
             // If text fits on a single line, shrink box width 
-            } else {
+            } else if text_width > name_width {
+                // Text is longer than name
                 self.text = String::from(text);
                 self.height = 1;
-                self.width = text.chars().count() as u16;
+                self.width = text_width as u16;
+            } else {
+                // Name is longer than text
+                self.text = String::from(text);
+                self.height = 1;
+                self.width = name_width as u16;
             }
+
+            let mut box_top = format!(" {}", self.user);
+            let box_top = format!("{} {}▀\n", box_top, "▀".repeat((self.width as usize)-box_top.chars().count()));
+            let box_bot = "▄".repeat((self.width as usize) + 2);
+            let mut box_mid = "".to_string();
+            for line in self.text.lines() {
+                box_mid = format!("{} {:<width$} \n", &box_mid, line, width = self.width as usize);
+            };
+
+            self.text = format!("{}{}{}", box_top, box_mid, box_bot);
 
             // Determine the self.x value for the message.
             self.place_message(&cols);
@@ -75,59 +95,14 @@ pub mod messages{
 
 // Draws the message according to it's internal values.
 pub fn draw_message(writer: &mut Stdout, msg_box: &messages::Message) -> Result<()> {
-    // Reset the cursor to the top right corner of the box
-    queue!(writer, terminal::ScrollUp(1),
-                   cursor::MoveTo(msg_box.x,msg_box.y))?;
-
-    // Draw a half-height border at the top; for aesthetics
-    while cursor::position().unwrap().0 != msg_box.x+msg_box.width+2 {
-        queue!(writer, cursor::MoveRight(0))?;
-        queue!(writer, style::SetForegroundColor(msg_box.color),
-                       style::Print("▄"))?;
-    }
-
-    // Reset the cursor to the top right corner of the box
-    queue!(writer, cursor::MoveTo(msg_box.x,msg_box.y))?;
-
-    queue!(writer, style::SetForegroundColor(msg_box.color),
-                   style::Print(" "),
-                   style::Print(&msg_box.user),
-                   style::Print(" "),
-                   style::ResetColor)?;
-
-    // Draw the message and box with it
     for line in msg_box.text.lines() {
-        // Shift the screen down
         queue!(writer, terminal::ScrollUp(1),
-        // Draw a lefthand border
                        cursor::MoveTo(msg_box.x,msg_box.y),
-                       style::SetForegroundColor(Color::Black), style::SetBackgroundColor(msg_box.color),
-                       style::Print(" "),
-                       cursor::MoveRight(0),
-        // Set the formatting of the message, then print, then reset formatting to default.
-                       style::Print(line))?;
-
-        // If the line doesn't span the width, draw empty spaces to fill the background.
-        while cursor::position().unwrap().0 != msg_box.x+msg_box.width+2 {
-            queue!(writer, cursor::MoveRight(0),
-                           style::Print(" "))?;
-        }
-        queue!(writer, style::ResetColor)?;
-    }
-
-    // Reset colors, cursor, and drop down to last line
-    queue!(writer, terminal::ScrollUp(1),
-                   cursor::MoveTo(msg_box.x,msg_box.y))?;
-
-    // Draw a bottom half-height border
-    while cursor::position().unwrap().0 != msg_box.x+msg_box.width+2 {
-        queue!(writer, cursor::MoveRight(0),
                        style::SetForegroundColor(msg_box.color),
-                       style::PrintStyledContent("▀".yellow()),
+                       style::SetAttribute(style::Attribute::Reverse),
+                       style::Print(line),
                        style::ResetColor)?;
     }
-
-    queue!(writer, terminal::ScrollUp(1))?;
     Ok(())
 }
 

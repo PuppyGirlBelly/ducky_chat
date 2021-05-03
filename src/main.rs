@@ -2,10 +2,12 @@ use std::io::{stdout, stdin, Write};
 use std::{thread, time::Duration, error::Error};
 use signal_hook::{iterator::Signals, consts::signal::SIGINT};
 use crossterm::{
-    queue, execute, terminal, cursor, style::{self, Color, Colorize}, Result, ExecutableCommand,
+    execute, terminal, style, Result, 
     // terminal, Result, ExecutableCommand,
 };
-use ducky::messages::Message;
+
+use ducky::messages::messages::Message;
+use ducky::{draw_message, draw_input};
 
 fn main() -> Result<()> {
     let mut signals = Signals::new(&[SIGINT])?;
@@ -21,13 +23,14 @@ fn main() -> Result<()> {
         }
     });
 
-    stdout.execute(terminal::Clear(terminal::ClearType::All))?;
+    execute!(stdout, terminal::Clear(terminal::ClearType::All),
+                     terminal::SetTitle("Duck Chat"))?;
 
     let mut message = Message::new("Welcome to Ducky Chat", "Info", 'l');
     message.color = style::Color::Grey;
 
-    while &input != "quit\n" {
-        ducky::draw_message(&mut stdout, &message)?;
+    while &input != "quit" {
+        draw_message(&mut stdout, &message)?;
         stdout.flush()?;
         input.clear();
 
@@ -37,26 +40,16 @@ fn main() -> Result<()> {
             message.color = duck_color;
             message.format_text("quak");
 
-            ducky::draw_message(&mut stdout, &message)?;
+            draw_message(&mut stdout, &message)?;
             stdout.flush()?;
         }
 
         if true {
-            execute!(stdout, cursor::MoveToNextLine(1),
-                             cursor::SavePosition,
-                             cursor::MoveRight(1),
-                             style::Print("> "),
-                             terminal::DisableLineWrap)?;
-            stdin().read_line(&mut input).expect("error: unable to read user input");
-            execute!(stdout, cursor::RestorePosition,
-                             terminal::Clear(terminal::ClearType::CurrentLine),
-                             terminal::EnableLineWrap)?;
-            stdout.flush()?;
-
+            draw_input(&mut stdout, &mut input)?;
             message.side = 'r';
             message.user = "user".to_string();
             message.color = user_color;
-            message.format_text(&input);
+            message.format_text(&mut input);
         }
     }
 

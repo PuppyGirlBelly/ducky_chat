@@ -27,18 +27,19 @@ pub fn draw_input(writer: &mut std::io::Stdout, input: &mut String) -> Result<()
                      style::PrintStyledContent("═".repeat(term_width).dark_grey()),
                      cursor::MoveToNextLine(1),
                      cursor::SavePosition,
-                     style::Print(" Message > "))?;
+                     style::Print("Message: "))?;
 
-    // stdin().read_line(input).expect("error: unable to read user input");
-    while let Event::Key(KeyEvent { code, .. }) = event::read()? {
-        match code {
-            KeyCode::Enter => { break; },
-            KeyCode::Char(c) => {input.push(c);},
-            _ => {},
-        }
-    }
+    stdin().read_line(input).expect("error: unable to read user input");
+    // while let Event::Key(KeyEvent { code, .. }) = event::read()? {
+    //     match code {
+    //         KeyCode::Enter   => { break; },
+    //         KeyCode::Left    => { execute!(writer, cursor::MoveLeft(1))?; },
+    //         KeyCode::Char(c) => {input.push(c);},
+    //         _ => {},
+    //     }
+    // }
 
-    let input_len = input.chars().count() + 11;
+    let input_len = input.chars().count() + 9;
     let input_rows = input_len / term_width;
 
     execute!(writer, terminal::ScrollDown( (input_rows as u16) + 1 ),

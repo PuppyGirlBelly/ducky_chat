@@ -17,7 +17,7 @@ pub mod messages{
     }
 
     impl Message {
-        pub fn new(text: &str, name: &str, side: char) -> Message {
+        pub fn new(text: &str, name: &str, side: char, color: crossterm::style::Color) -> Message {
             let mut new_message = Message{
                 x: 2,
                 y: 2,
@@ -25,8 +25,8 @@ pub mod messages{
                 height: 1,
                 side: side,
                 user: String::from(name),
-                color: crossterm::style::Color::Yellow,
-                text: String::from("Hello World!"),
+                color: color,
+                text: String::new(),
             };
             
             // Format and place message based off of text and side provided
@@ -36,7 +36,7 @@ pub mod messages{
         }
 
         // Figure out the size of the sting, and create a box for it.
-        pub fn format_text(&mut self, text: &str) {
+        fn format_text(&mut self, text: &str) {
             // Determine the size of the screen
             let (cols, rows) = crossterm::terminal::size().unwrap();
 
@@ -82,7 +82,7 @@ pub mod messages{
         }
 
         // Determine which side the message will be on; and then set a new x value accordingly
-        pub fn place_message(&mut self, &cols: &u16) {
+        fn place_message(&mut self, &cols: &u16) {
             if self.side == 'r' {
                 // Base the right hand side on the width of the message.
                 self.x = cols-3-self.width; 

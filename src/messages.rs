@@ -1,10 +1,10 @@
-use std::io::Stdout;
-use crossterm::{
-    queue, terminal, cursor, style::{self, Color, Colorize}, Result, 
-};
-use textwrap;
+// use std::io::Stdout;
+// use crossterm::{
+//     queue, terminal, cursor, style::{self, Color, Colorize}, Result, 
+// };
+// use textwrap;
 
-pub mod messages{
+pub mod message{
     pub struct Message {
         pub x: u16,
         pub y: u16,
@@ -23,9 +23,9 @@ pub mod messages{
                 y: 2,
                 width: 13,
                 height: 1,
-                side: side,
+                side,
                 user: String::from(name),
-                color: color,
+                color,
                 text: String::new(),
             };
             

@@ -1,10 +1,10 @@
-use std::io::{stdout, stdin, Write};
+// use std::io::{stdout, stdin, Write};
 use crossterm::{
     queue, execute, terminal, cursor, style::{ self, Colorize }, Result, event::{self, Event, KeyCode, KeyEvent},
 };
 
 pub mod messages;
-pub use messages::messages::Message;
+pub use messages::message::Message;
 
 // Draws the message according to it's internal values.
 pub fn draw_message(writer: &mut std::io::Stdout, msg_box: &Message) -> Result<()> {
@@ -29,15 +29,16 @@ pub fn draw_input(writer: &mut std::io::Stdout, input: &mut String) -> Result<()
                      cursor::SavePosition,
                      style::Print("Message: "))?;
 
-    stdin().read_line(input).expect("error: unable to read user input");
-    // while let Event::Key(KeyEvent { code, .. }) = event::read()? {
-    //     match code {
-    //         KeyCode::Enter   => { break; },
-    //         KeyCode::Left    => { execute!(writer, cursor::MoveLeft(1))?; },
-    //         KeyCode::Char(c) => {input.push(c);},
-    //         _ => {},
-    //     }
-    // }
+    // stdin().read_line(input).expect("error: unable to read user input");
+    while let Event::Key(KeyEvent { code, .. }) = event::read()? {
+        match code {
+            KeyCode::Enter   => { break; },
+            KeyCode::Left    => { execute!(writer, cursor::MoveLeft(1))?; },
+            KeyCode::Right   => { execute!(writer, cursor::MoveRight(1))?; },
+            KeyCode::Char(c) => {input.push(c);},
+            _ => {},
+        }
+    }
 
     let input_len = input.chars().count() + 9;
     let input_rows = input_len / term_width;

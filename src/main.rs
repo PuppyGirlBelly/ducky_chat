@@ -3,12 +3,10 @@ use std::thread;
 use signal_hook::{iterator::Signals, consts::signal::SIGINT};
 use crossterm::{
     execute, terminal, style::{self, Color}, Result, 
-    // terminal, Result, ExecutableCommand,
 };
 use serde::{Serialize, Deserialize};
-use confy;
 
-use ducky::messages::messages::Message;
+use ducky::messages::message::Message;
 use ducky::{draw_message, draw_input};
 
 fn main() -> Result<()> {
@@ -16,10 +14,10 @@ fn main() -> Result<()> {
     let mut stdout = stdout();
     let mut input: String = String::new();
     let DuckConfig {
-        user_name:  user_name,
-        duck_name:  duck_name,
-        user_color: user_color,
-        duck_color: duck_color,
+        user_name,
+        duck_name,
+        user_color,
+        duck_color,
     } = confy::load("ducky")?;
 
     thread::spawn(move || {

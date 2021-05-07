@@ -1,16 +1,15 @@
-use std::io::{stdout, Write};
-use std::thread;
-use signal_hook::{iterator::Signals, consts::signal::SIGINT};
 use crossterm::{
-    execute, terminal, style::{self, Color}, Result, 
+    execute,
+    style::{self, Color},
+    terminal, Result,
 };
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::io::{stdout, Write};
 
 use ducky::messages::message::Message;
-use ducky::{draw_message, draw_input};
+use ducky::{draw_input, draw_message};
 
 fn main() -> Result<()> {
-    let mut signals = Signals::new(&[SIGINT])?;
     let mut stdout = stdout();
     let mut input: String = String::new();
     let DuckConfig {
@@ -20,15 +19,11 @@ fn main() -> Result<()> {
         duck_color,
     } = confy::load("ducky")?;
 
-    thread::spawn(move || {
-        for sig in signals.forever() {
-            println!("Received signal {:?}", sig);
-            // running = false;
-        }
-    });
-
-    execute!(stdout, terminal::Clear(terminal::ClearType::All),
-                     terminal::SetTitle("Duck Chat"))?;
+    execute!(
+        stdout,
+        terminal::Clear(terminal::ClearType::All),
+        terminal::SetTitle("Duck Chat")
+    )?;
 
     let message = Message::new("Welcome to Ducky Chat", "Info", 'l', style::Color::White);
     draw_message(&mut stdout, &message)?;
@@ -56,8 +51,8 @@ fn main() -> Result<()> {
 
 #[derive(Serialize, Deserialize)]
 struct DuckConfig {
-    user_name:  String,
-    duck_name:  String,
+    user_name: String,
+    duck_name: String,
     #[serde(with = "ColorDef")]
     user_color: Color,
     #[serde(with = "ColorDef")]
@@ -84,22 +79,17 @@ enum ColorDef {
     DarkCyan,
     White,
     Grey,
-    Rgb {
-        r: u8,
-        g: u8,
-        b: u8,
-    },
+    Rgb { r: u8, g: u8, b: u8 },
     AnsiValue(u8),
 }
-
 
 impl ::std::default::Default for DuckConfig {
     fn default() -> Self {
         DuckConfig {
-            user_name:  String::from("User"),
-            duck_name:  String::from("Duck"),
+            user_name: String::from("User"),
+            duck_name: String::from("Duck"),
             user_color: Color::Blue,
             duck_color: Color::Yellow,
-        } 
+        }
     }
 }

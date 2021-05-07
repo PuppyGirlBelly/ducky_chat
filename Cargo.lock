@@ -35,7 +35,7 @@ dependencies = [
  "libc",
  "mio",
  "parking_lot",
- "signal-hook 0.1.17",
+ "signal-hook",
  "winapi",
 ]
 
@@ -63,10 +63,16 @@ version = "0.1.0"
 dependencies = [
  "confy",
  "crossterm",
+ "linenoise-rust",
  "serde",
- "signal-hook 0.3.8",
  "textwrap",
 ]
+
+[[package]]
+name = "gcc"
+version = "0.3.55"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f5f3913fa0bfe7ee1fd8248b6b9f42a5af4b9d65ec2dd2c3c26132b950ecfc2"
 
 [[package]]
 name = "instant"
@@ -88,6 +94,16 @@ name = "libc"
 version = "0.2.94"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "18794a8ad5b29321f790b55d93dfba91e125cb1a9edbd4f8e3150acc771c1a5e"
+
+[[package]]
+name = "linenoise-rust"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "76c2435a60a4dae373b7e7e1a8966bfd9b84494f9a05d0e59ff4adbae8cae152"
+dependencies = [
+ "gcc",
+ "libc",
+]
 
 [[package]]
 name = "lock_api"
@@ -224,16 +240,6 @@ checksum = "7e31d442c16f047a671b5a71e2161d6e68814012b7f5379d269ebd915fac2729"
 dependencies = [
  "libc",
  "mio",
- "signal-hook-registry",
-]
-
-[[package]]
-name = "signal-hook"
-version = "0.3.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef33d6d0cd06e0840fba9985aab098c147e67e05cee14d412d3345ed14ff30ac"
-dependencies = [
- "libc",
  "signal-hook-registry",
 ]
 

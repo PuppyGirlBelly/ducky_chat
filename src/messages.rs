@@ -65,8 +65,8 @@ pub mod message{
                 self.width = name_width as u16;
             }
 
-            let box_top = format!(" {}", self.user);
-            let box_top = format!("{} {}▀\n", box_top, "▀".repeat((self.width as usize)-box_top.chars().count()));
+            let box_top = format!(" {:▀<width$}▀\n", format!("{} ", self.user), width = self.width as usize);
+            // let box_top = format!("{} {}▀\n", box_top, "▀".repeat((self.width as usize)-box_top.chars().count()));
             let box_bot = "▄".repeat((self.width as usize) + 2);
             let mut box_mid = "".to_string();
             for line in self.text.lines() {
@@ -78,7 +78,6 @@ pub mod message{
             // Determine the self.x value for the message.
             self.place_message(&cols);
             self.y = rows - 3; // Place boxes at the bottom of the screen (plus space for input)
-
         }
 
         // Determine which side the message will be on; and then set a new x value accordingly

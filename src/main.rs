@@ -8,15 +8,16 @@ use std::io::{stdout, Write};
 
 use ducky::messages::message::Message;
 use ducky::{draw_input, draw_message};
+use ducky::duck::duck;
 
 fn main() -> Result<()> {
     let mut stdout = stdout();
     let mut input: String = String::new();
     let DuckConfig {
         user_name,
-        duck_name,
+        duck_name: _,
         user_color,
-        duck_color,
+        duck_color: _,
         user_trig: _,
         duck_trig: _,
     } = confy::load("ducky")?;
@@ -35,7 +36,7 @@ fn main() -> Result<()> {
         input.clear();
 
         if true {
-            let message = Message::new("quak", &duck_name, 'l', duck_color);
+            let message = duck::new();
             draw_message(&mut stdout, &message)?;
             stdout.flush()?;
         }

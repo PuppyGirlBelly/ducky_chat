@@ -25,6 +25,7 @@ pub mod message{
             
             // Format and place message based off of text and side provided
             new_message.format_text(text);
+            new_message.format_box();
 
             new_message
         }
@@ -59,6 +60,13 @@ pub mod message{
                 self.width = name_width as u16;
             }
 
+
+            // Determine the self.x value for the message.
+            self.place_message(&cols);
+            self.y = rows - 3; // Place boxes at the bottom of the screen (plus space for input)
+        }
+
+        fn format_box(&mut self) {
             let box_top = format!(" {:▀<width$}▀\n", format!("{} ", self.user), width = self.width as usize);
             let box_bot = "▄".repeat((self.width as usize) + 2);
             let mut box_mid = "".to_string();
@@ -70,9 +78,6 @@ pub mod message{
 
             self.text = format!("{}{}{}", box_top, box_mid, box_bot);
 
-            // Determine the self.x value for the message.
-            self.place_message(&cols);
-            self.y = rows - 3; // Place boxes at the bottom of the screen (plus space for input)
         }
 
         // Determine which side the message will be on; and then set a new x value accordingly

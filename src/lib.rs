@@ -7,6 +7,7 @@ use crossterm::{
 };
 
 pub mod messages;
+pub mod duck;
 pub use messages::message::Message;
 
 // Draws the message according to it's internal values.

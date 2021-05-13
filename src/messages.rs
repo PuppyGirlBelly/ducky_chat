@@ -1,9 +1,3 @@
-// use std::io::Stdout;
-// use crossterm::{
-//     queue, terminal, cursor, style::{self, Color, Colorize}, Result, 
-// };
-// use textwrap;
-
 pub mod message{
     pub struct Message {
         pub x: u16,
@@ -42,7 +36,7 @@ pub mod message{
 
             // Determine the maximum size of each box (60% of the screen)
             let max_width: usize = ((cols/2) + (cols/10)).into();
-            let text_width: usize = text.chars().count();
+            let text_width: usize = unicode_width::UnicodeWidthStr::width(text);
             let name_width: usize = self.user.chars().count() + 1;
 
             // If text is bigger than max width, wrap it into lines; and adjust hight and width
@@ -66,11 +60,12 @@ pub mod message{
             }
 
             let box_top = format!(" {:▀<width$}▀\n", format!("{} ", self.user), width = self.width as usize);
-            // let box_top = format!("{} {}▀\n", box_top, "▀".repeat((self.width as usize)-box_top.chars().count()));
             let box_bot = "▄".repeat((self.width as usize) + 2);
             let mut box_mid = "".to_string();
             for line in self.text.lines() {
-                box_mid = format!("{} {:<width$} \n", &box_mid, line, width = self.width as usize);
+                let padding_size = (self.width as usize) - unicode_width::UnicodeWidthStr::width(line);
+                let padding = format!("{:width$}", "", width = padding_size);
+                box_mid = format!("{} {}{} \n", &box_mid, line, padding);
             };
 
             self.text = format!("{}{}{}", box_top, box_mid, box_bot);

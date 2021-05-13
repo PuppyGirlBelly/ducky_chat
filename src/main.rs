@@ -17,6 +17,8 @@ fn main() -> Result<()> {
         duck_name,
         user_color,
         duck_color,
+        user_trig: _,
+        duck_trig: _,
     } = confy::load("ducky")?;
 
     execute!(
@@ -57,6 +59,8 @@ struct DuckConfig {
     user_color: Color,
     #[serde(with = "ColorDef")]
     duck_color: Color,
+    user_trig: String,
+    duck_trig: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -90,6 +94,8 @@ impl ::std::default::Default for DuckConfig {
             duck_name: String::from("Duck"),
             user_color: Color::Blue,
             duck_color: Color::Yellow,
+            user_trig: String::from("user"),
+            duck_trig: String::from("duck"),
         }
     }
 }

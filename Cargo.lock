@@ -66,6 +66,7 @@ dependencies = [
  "linenoise-rust",
  "serde",
  "textwrap",
+ "unicode-width",
 ]
 
 [[package]]

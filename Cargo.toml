@@ -12,3 +12,16 @@ textwrap = "0.13.4"
 serde = { version = "1.0.125", features = ["derive"] }
 confy = "0.3.1"
 linenoise-rust = "0.2.1"
+unicode-width = "0.1.5"
+
+
+# TODO:
+# - Menu for config
+# - Text parsing for menu/options
+# - Text parsing for user/duck messages
+# - Add more duck phrases
+# - Make message sending async
+# - Redraw messages on resize
+#   - Create message buffer?
+# - Export messagers to plaintext
+# - Let user override duck to use as pluralchat

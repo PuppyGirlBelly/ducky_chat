@@ -1,4 +1,3 @@
-// use std::io::{stdout, stdin, Write};
 use crossterm::{
     cursor,
     // event::{self, Event, KeyCode, KeyEvent},

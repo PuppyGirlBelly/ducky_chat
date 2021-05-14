@@ -13,13 +13,14 @@ use ducky::duck::duck;
 fn main() -> Result<()> {
     let mut stdout = stdout();
     let mut input: String = String::new();
+    let mut mode = "user";
     let DuckConfig {
         user_name,
-        duck_name: _,
+        duck_name,
         user_color,
-        duck_color: _,
-        user_trig: _,
-        duck_trig: _,
+        duck_color,
+        user_trig,
+        duck_trig,
     } = confy::load("ducky")?;
 
     execute!(
@@ -28,24 +29,41 @@ fn main() -> Result<()> {
         terminal::SetTitle("Duck Chat")
     )?;
 
-    let message = Message::new("Welcome to Ducky Chat", "Info", 'l', style::Color::White);
+    let mut message = Message::new("Welcome to Ducky Chat", "Info", 'l', style::Color::White);
     draw_message(&mut stdout, &message)?;
     stdout.flush()?;
 
     while &input != "quit" {
         input.clear();
 
-        if true {
-            let message = duck::new();
-            draw_message(&mut stdout, &message)?;
-            stdout.flush()?;
+        stdout.flush()?;
+        draw_input(&mut stdout, &mut input)?;
+
+        if mode == "auto" {
+            mode = "auto";
+        } else if input.starts_with(&user_trig) {
+            mode = "user";
+            input = input.strip_prefix(&user_trig).unwrap().trim().to_string();
+        } else if input.starts_with(&duck_trig) {                 
+            mode = "duck";                                        
+            input = input.strip_prefix(&duck_trig).unwrap().trim().to_string();
         }
 
-        if true {
-            draw_input(&mut stdout, &mut input)?;
-            let message = Message::new(&input, &user_name, 'r', user_color);
+
+        if input != "" {
+            match mode {
+                "auto" => {
+                    message = Message::new(&input, &user_name, 'r', user_color);
+                    draw_message(&mut stdout, &message)?;
+
+                    message = duck::new();
+                }
+                "user" => { message = Message::new(&input, &user_name, 'r', user_color); }
+                "duck" => { message = Message::new(&input, &duck_name, 'l', duck_color); }
+                _ => {}
+            }
+
             draw_message(&mut stdout, &message)?;
-            stdout.flush()?;
         }
     }
 
@@ -95,8 +113,8 @@ impl ::std::default::Default for DuckConfig {
             duck_name: String::from("Duck"),
             user_color: Color::Blue,
             duck_color: Color::Yellow,
-            user_trig: String::from("user"),
-            duck_trig: String::from("duck"),
+            user_trig: String::from("User:"),
+            duck_trig: String::from("Duck:"),
         }
     }
 }

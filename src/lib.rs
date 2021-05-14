@@ -27,29 +27,30 @@ pub fn draw_message(writer: &mut std::io::Stdout, msg_box: &Message) -> Result<(
 }
 
 pub fn draw_input(writer: &mut std::io::Stdout, input: &mut String) -> Result<()> {
-    let term_width = terminal::size().unwrap().0 as usize;
+    let (cols, rows) = crossterm::terminal::size().unwrap();
 
     execute!(
         writer,
+        cursor::MoveTo(0, ( rows ) - 3),
         terminal::ScrollUp(1),
         cursor::MoveToColumn(0),
-        style::PrintStyledContent("═".repeat(term_width).dark_grey()),
+        style::PrintStyledContent("═".repeat(cols as usize).dark_grey()),
         cursor::MoveToNextLine(1),
         cursor::SavePosition,
         // style::Print("Message: ")
     )?;
 
-    let val = linenoise::input("message: ").unwrap();
+    let val = linenoise::input(" Message: ").unwrap();
     *input = val.to_string();
 
-    let input_len = input.chars().count() + 9;
-    let input_rows = input_len / term_width;
+    let input_len = input.chars().count() + 10;
+    let input_rows = ( input_len as u16) / cols;
 
     execute!(
         writer,
-        terminal::ScrollDown((input_rows as u16) + 1),
+        terminal::ScrollDown(1 + input_rows),
         cursor::RestorePosition,
-        terminal::Clear(terminal::ClearType::FromCursorDown)
+        terminal::Clear(terminal::ClearType::FromCursorDown),
     )?;
 
     Ok(())

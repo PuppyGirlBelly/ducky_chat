@@ -1,4 +1,3 @@
-
 pub mod duck {
     use rand::seq::SliceRandom;
     use crate::messages::message::Message;

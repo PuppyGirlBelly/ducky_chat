@@ -1,4 +1,8 @@
 pub mod message{
+    use crossterm::style::Color;
+    use crossterm::terminal;
+    use unicode_width::UnicodeWidthStr;
+
     pub struct Message {
         pub x: u16,
         pub y: u16,
@@ -6,12 +10,12 @@ pub mod message{
         pub height: u16,
         pub side: char,
         pub user: String,
-        pub color: crossterm::style::Color,
+        pub color: Color,
         pub text: String,
     }
 
     impl Message {
-        pub fn new(text: &str, name: &str, side: char, color: crossterm::style::Color) -> Message {
+        pub fn new(text: &str, name: &str, side: char, color: Color) -> Message {
             let mut new_message = Message{
                 x: 2,
                 y: 2,
@@ -20,42 +24,35 @@ pub mod message{
                 side,
                 user: String::from(name),
                 color,
-                text: String::new(),
+                text: text.to_string(),
             };
             
             // Format and place message based off of text and side provided
-            new_message.format_text(text);
+            new_message.format_text();
             new_message.format_box();
 
             new_message
         }
 
         // Figure out the size of the sting, and create a box for it.
-        fn format_text(&mut self, text: &str) {
+        fn format_text(&mut self) {
             // Determine the size of the screen
-            let (cols, rows) = crossterm::terminal::size().unwrap();
+            let (cols, rows) = terminal::size().unwrap();
 
             // Determine the maximum size of each box (60% of the screen)
             let max_width: usize = ((cols/2) + (cols/10)).into();
-            let text_width: usize = unicode_width::UnicodeWidthStr::width(text);
+            let text_width: usize = UnicodeWidthStr::width(&self.text[..]);
             let name_width: usize = self.user.chars().count() + 1;
 
             // If text is bigger than max width, wrap it into lines; and adjust hight and width
             if text_width > max_width {
-                let options = textwrap::Options::new(max_width as usize);
-                self.text = textwrap::fill(text, options);
+                textwrap::fill_inplace(&mut self.text, max_width);
                 self.height = self.text.lines().count() as u16;
-                self.width = max_width as u16; // Added to prevent bugs during testing
-            // Check if the username is longer than the text size
-            // If text fits on a single line, shrink box width 
-            } else if text_width > name_width {
-                // Text is longer than name
-                self.text = String::from(text);
+                self.width = max_width as u16; 
+            } else if text_width > name_width { // Text is longer than name
                 self.height = 1;
                 self.width = text_width as u16;
-            } else {
-                // Name is longer than text
-                self.text = String::from(text);
+            } else { // Name is longer than text
                 self.height = 1;
                 self.width = name_width as u16;
             }
@@ -71,7 +68,7 @@ pub mod message{
             let box_bot = "▄".repeat((self.width as usize) + 2);
             let mut box_mid = "".to_string();
             for line in self.text.lines() {
-                let padding_size = (self.width as usize) - unicode_width::UnicodeWidthStr::width(line);
+                let padding_size = (self.width as usize) - UnicodeWidthStr::width(line);
                 let padding = format!("{:width$}", "", width = padding_size);
                 box_mid = format!("{} {}{} \n", &box_mid, line, padding);
             };

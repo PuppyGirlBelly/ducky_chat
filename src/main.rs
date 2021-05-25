@@ -1,26 +1,19 @@
 use crossterm::{
     execute,
-    style::{self, Color},
+    style::Color,
     terminal, Result,
 };
 use std::io::{stdout, Write};
 
-use ducky::messages::message::Message;
-use ducky::menu::menu::{Settings, config_menu, draw_input, draw_message};
-use ducky::duck::duck;
+mod messages {
+    pub use Message;
+}
+use ducky::menu::{Settings, config_menu, draw_input, draw_message};
 
 fn main() -> Result<()> {
     let mut stdout = stdout();
     let mut input: String = String::new();
-    let Settings {
-        mut mode,
-        user_name,
-        duck_name,
-        user_color,
-        duck_color,
-        user_trig,
-        duck_trig,
-    } = confy::load("ducky")?;
+    let mut settings: Settings = confy::load("ducky")?;
 
     execute!(
         stdout,
@@ -28,7 +21,7 @@ fn main() -> Result<()> {
         terminal::SetTitle("Duck Chat")
     )?;
 
-    let mut message = Message::new("Welcome to Ducky Chat! (Type 'help' for information)", "Info", 'l', style::Color::White);
+    let mut message = Message::new("Welcome to Ducky Chat! (Type 'help' for information)", "Info", 'l', &Color::White);
     draw_message(&mut stdout, &message)?;
     stdout.flush()?;
 
@@ -40,28 +33,28 @@ fn main() -> Result<()> {
 
 
         if input == "menu" {
-            config_menu(&mut stdout)?;
-        } else if mode == "auto" {
-        } else if input.starts_with(&user_trig) {
-            mode = "user".to_string();
-            input = input.strip_prefix(&user_trig).unwrap().trim().to_string();
-        } else if input.starts_with(&duck_trig) {                 
-            mode = "duck".to_string();
-            input = input.strip_prefix(&duck_trig).unwrap().trim().to_string();
+            settings = config_menu(&mut stdout)?;
+            confy::store("ducky", &settings)?;
+            input = String::new();
+        } else if settings.mode == "auto" {
+        } else if input.starts_with(&settings.user_trig) {
+            settings.mode = "user".to_string();
+            input = input.strip_prefix(&settings.user_trig).unwrap().trim().to_string();
+        } else if input.starts_with(&settings.duck_trig) {                 
+            settings.mode = "duck".to_string();
+            input = input.strip_prefix(&settings.duck_trig).unwrap().trim().to_string();
         }
 
-
-        if input != "" {
-            match &mode[..] {
+        if !input.trim().is_empty() {
+            match &settings.mode[..] {
                 "auto" => {
-                    message = Message::new(&input, &user_name, 'r', user_color);
+                    message = Message::new(&input, &settings.user_name, 'r', &settings.user_color);
                     draw_message(&mut stdout, &message)?;
 
                     message = duck::new();
                 }
-                "user" => { message = Message::new(&input, &user_name, 'r', user_color); }
-                "duck" => { message = Message::new(&input, &duck_name, 'l', duck_color); }
-                "menu" => { mode = "auto".to_string() }
+                "user" => { message = Message::new(&input, &settings.user_name, 'r', &settings.user_color); }
+                "duck" => { message = Message::new(&input, &settings.duck_name, 'l', &settings.duck_color); }
                 _ => {}
             }
 

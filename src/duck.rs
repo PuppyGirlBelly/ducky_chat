@@ -1,30 +1,22 @@
-pub mod duck {
-    use rand::seq::SliceRandom;
-    use crate::messages::message::Message;
+use rand::seq::SliceRandom;
+mod messages;
 
-    pub fn new() -> Message {
-        let text = random_quack();
-        let color = crossterm::style::Color::Yellow;
-        let name = "Duck";
+pub fn new() -> messages::Message {
+    Message::new(random_quack(), "Duck", 'l', &crossterm::style::Color::Yellow)
+}
 
-        let duck_message = Message::new(text, name, 'l', color);
+fn random_quack() -> &'static str {
+    let quack_list = vec![
+        "quak",
+        "quack",
+        "quackquackqucak",
+        "🦆",
+        "*squeak*",
+        "*flap*",
+        "float",
+    ];
 
-        duck_message
-    }
+    let quack = quack_list.choose(&mut rand::thread_rng()).unwrap();
 
-    fn random_quack() -> &'static str {
-        let quack_list = vec![
-            "quak",
-            "quack",
-            "quackquackqucak",
-            "🦆",
-            "*squeak*",
-            "*flap*",
-            "float",
-        ];
-
-        let quack = quack_list.choose(&mut rand::thread_rng()).unwrap();
-
-        quack
-    }
+    quack
 }

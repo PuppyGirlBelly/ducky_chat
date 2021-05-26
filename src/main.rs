@@ -5,9 +5,10 @@ use crossterm::{
 };
 use std::io::{stdout, Write};
 
-mod messages {
-    pub use Message;
-}
+mod messages;
+use ducky::Message;
+
+mod duck;
 use ducky::menu::{Settings, config_menu, draw_input, draw_message};
 
 fn main() -> Result<()> {

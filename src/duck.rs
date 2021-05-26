@@ -1,7 +1,7 @@
 use rand::seq::SliceRandom;
-mod messages;
+use crate::Message;
 
-pub fn new() -> messages::Message {
+pub fn new() -> Message {
     Message::new(random_quack(), "Duck", 'l', &crossterm::style::Color::Yellow)
 }
 

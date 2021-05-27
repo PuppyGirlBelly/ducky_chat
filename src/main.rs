@@ -5,16 +5,17 @@ use crossterm::{
 };
 use std::io::{stdout, Write};
 
+mod menu;
 mod messages;
-use ducky::Message;
-
 mod duck;
-use ducky::menu::{Settings, config_menu, draw_input, draw_message};
+
+use messages::Message;
+use menu::{Settings, config_menu, draw_input, draw_message};
 
 fn main() -> Result<()> {
     let mut stdout = stdout();
     let mut input: String = String::new();
-    let mut settings: Settings = confy::load("ducky")?;
+    let mut settings: Settings = confy::load("ducky").unwrap();
 
     execute!(
         stdout,
@@ -26,16 +27,15 @@ fn main() -> Result<()> {
     draw_message(&mut stdout, &message)?;
     stdout.flush()?;
 
-    while &input != "quit" {
+    loop {
         input.clear();
 
         stdout.flush()?;
         draw_input(&mut stdout, &mut input)?;
 
-
         if input == "menu" {
             settings = config_menu(&mut stdout)?;
-            confy::store("ducky", &settings)?;
+            confy::store("ducky", &settings);
             input = String::new();
         } else if settings.mode == "auto" {
         } else if input.starts_with(&settings.user_trig) {
@@ -44,6 +44,8 @@ fn main() -> Result<()> {
         } else if input.starts_with(&settings.duck_trig) {                 
             settings.mode = "duck".to_string();
             input = input.strip_prefix(&settings.duck_trig).unwrap().trim().to_string();
+        } else if input == "quit" {
+            break
         }
 
         if !input.trim().is_empty() {

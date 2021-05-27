@@ -10,7 +10,12 @@ use crate::messages::Message;
 use std::io::{Stdout, Write};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+mod mode;
+mod name;
+mod color;
+mod triggers;
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Settings {
     pub mode: String,
     pub user_name: String,
@@ -68,25 +73,26 @@ pub fn config_menu(writer: &mut Stdout) -> Result<Settings> {
         terminal::Clear(terminal::ClearType::All),
     )?;
 
-    let mut settings: Settings = confy::load("ducky")?;
+    let mut settings: Settings = confy::load("ducky").unwrap();
 
     let main_menu_text = "[Config Menu]\n\
-                              type 'mode' for name submenu\n\
-                              type 'name' for name submenu\n\
-                              type 'color' for color submenu\n\
-                              type 'trigger' for trigger submenu\n\n\
-                              type 'quit' to return to chat\n";
+                          type 'mode' for mode submenu\n\
+                          type 'name' for name submenu\n\
+                          type 'color' for color submenu\n\
+                          type 'trigger' for trigger submenu\n\n\
+                          type 'quit' to return to chat\n";
     let error_message = Message::new("Invalid Input", "Menu", 'l', &Color::Grey);
     let mut menu_input: String = String::new();
+    
 
     while &menu_input != "quit" {
         menu_input = draw_menu(writer, &main_menu_text)?;
 
         match &menu_input[..] {
-            "mode"    => { mode_menu(writer, &mut settings)?; },
-            // "name"    => {  },
-            // "color"   => {  },
-            // "trigger" => {  },
+            "mode"    => { mode::menu(writer, &mut settings)?; },
+            "name"    => { name::menu(writer, &mut settings)?; },
+            "color"   => { color::menu(writer, &mut settings)?; },
+            "trigger" => { triggers::menu(writer, &mut settings)?; },
             _         => { draw_message(writer, &error_message)?; },
         };
     }
@@ -97,84 +103,6 @@ pub fn config_menu(writer: &mut Stdout) -> Result<Settings> {
     )?;
 
     Ok(settings)
-}
-
-pub fn mode_menu(writer: &mut Stdout, settings: &mut Settings) -> Result<()> {
-    execute!(
-        writer,
-        terminal::Clear(terminal::ClearType::All),
-    )?;
-
-    let mode_menu_text = format!("Mode Menu\n\
-                                     Your current mode is [{}]\n\n\
-                                     type 'auto' to set Auto Duck mode.\n\
-                                     (Sets duck to default parameters and replies to every message you make)\n\n\
-                                     type 'manual' to set Manual Message mode.\n\
-                                     (Applies settings to duck messages, and allows you to swap between 'duck' and 'user' messages via triggers)\n\n\
-                                     type 'quit' to return to main menu",
-                                     settings.mode);
-
-    let mut menu_input: String = String::new();
-
-    loop {
-        menu_input = draw_menu(writer, &mode_menu_text).unwrap();
-
-        match &menu_input[..] {
-            "auto" => { 
-                settings.mode = "auto".to_string();
-                draw_menu(writer, "Chat is now set to 'auto' mode.")?;
-                break;
-            },
-            "manual" => {
-                settings.mode = "user".to_string();
-                draw_menu(writer, "Chat is now set to 'manual' mode.")?;
-                break;
-            },
-            "quit" => { break; }
-            _ => { draw_menu(writer, "Invalid Input")?; },
-        };
-
-    }
-
-    execute!( writer, terminal::Clear(terminal::ClearType::All))?;
-
-    Ok(())
-}
-
-fn name_menu(writer: &mut Stdout, settings: &mut Settings) -> Result<()> {
-    execute!(
-        writer,
-        terminal::Clear(terminal::ClearType::All),
-    )?;
-
-    let mode_menu_text = format!("Mode Menu\n\
-                                     Your current user and duck names are '{}' and '{}'\n\n\
-                                     type 'user' to set user name.\n\
-                                     type 'duck' to set duck name.",
-                                     settings.user_name, settings.duck_name);
-    let menu_message = Message::new(&mode_menu_text, "Menu", 'l', &Color::Grey);
-    let error_message = Message::new("Invalid Input", "Menu", 'l', &Color::Grey);
-    let mut menu_input: String = String::new();
-
-    draw_message(writer, &menu_message)?;
-
-    while &menu_input != "quit" {
-        writer.flush()?;
-        menu_input.clear();
-
-        draw_input(writer, &mut menu_input)?;
-
-        match &menu_input[..] {
-            //     "auto"   => { settings.mode = "auto".to_string(); menu_input = "quit".to_string(); },
-            //     "manual" => { settings.mode = "manual".to_string(); menu_input = "quit".to_string(); },
-            _        => { draw_message(writer, &error_message)?; },
-        };
-
-    }
-
-    execute!( writer, terminal::Clear(terminal::ClearType::All))?;
-
-    Ok(())
 }
 
 fn draw_menu(writer: &mut Stdout, text: &str) -> Result<String> {

@@ -19,7 +19,7 @@ pub fn menu(writer: &mut Stdout, settings: &mut Settings) -> Result<()> {
                                   settings.user_trig,
                                   settings.duck_trig);
 
-    let mut menu_input: String = String::new();
+    let mut menu_input: String;
 
     loop {
         menu_input = draw_menu(writer, &mode_menu_text).unwrap();
@@ -27,18 +27,18 @@ pub fn menu(writer: &mut Stdout, settings: &mut Settings) -> Result<()> {
         match &menu_input[..] {
             "user" => { 
                 settings.user_trig = draw_menu(writer, "Enter the trigger for 'user'")?;
-                let feedback = format!("Your user trigger is now '{}'", settings.user_trig);
+                let feedback = format!("Your user trigger is now '{}'\n[press enter]", settings.user_trig);
                 draw_menu(writer, &feedback)?;
                 break;
             },
             "duck" => {
                 settings.duck_trig = draw_menu(writer, "Enter the trigger for 'duck'")?;
-                let feedback = format!("Your duck trigger is now '{}'", settings.duck_trig);
+                let feedback = format!("Your duck trigger is now '{}'\n[press enter]", settings.duck_trig);
                 draw_menu(writer, &feedback)?;
                 break;
             },
             "quit" => { break; }
-            _ => { draw_menu(writer, "Invalid Input")?; },
+            _ => { draw_menu(writer, "Invalid Input\n[press enter]")?; },
         };
 
     }

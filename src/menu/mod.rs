@@ -14,6 +14,7 @@ mod mode;
 mod name;
 mod color;
 mod triggers;
+mod help;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Settings {
@@ -76,16 +77,17 @@ pub fn config_menu(writer: &mut Stdout) -> Result<Settings> {
     let mut settings: Settings = confy::load("ducky").unwrap();
 
     let main_menu_text = "[Config Menu]\n\
+                          type 'help' for information about duckchat!\n\
                           type 'mode' for mode submenu\n\
                           type 'name' for name submenu\n\
                           type 'color' for color submenu\n\
                           type 'trigger' for trigger submenu\n\n\
                           type 'quit' to return to chat\n";
     let error_message = Message::new("Invalid Input", "Menu", 'l', &Color::Grey);
-    let mut menu_input: String = String::new();
+    let mut menu_input: String;
     
 
-    while &menu_input != "quit" {
+    loop {
         menu_input = draw_menu(writer, &main_menu_text)?;
 
         match &menu_input[..] {
@@ -93,6 +95,8 @@ pub fn config_menu(writer: &mut Stdout) -> Result<Settings> {
             "name"    => { name::menu(writer, &mut settings)?; },
             "color"   => { color::menu(writer, &mut settings)?; },
             "trigger" => { triggers::menu(writer, &mut settings)?; },
+            "help"    => { help::menu(writer)?; },
+            "quit"    => { break; }
             _         => { draw_message(writer, &error_message)?; },
         };
     }
@@ -153,8 +157,15 @@ pub fn draw_input(writer: &mut Stdout, input: &mut String) -> Result<()> {
         cursor::SavePosition,
     )?;
 
-    let val = linenoise::input(" Message: ").unwrap();
-    *input = val.to_string();
+    let reader = linefeed::Interface::new("ducky")?;
+    reader.set_prompt(" Message: ")?;
+
+    while let linefeed::ReadResult::Input(user_input) = reader.read_line()? {
+        *input = user_input.to_string();
+        break;
+    }
+    // let val = linenoise::input(" Message: ").unwrap();
+    // *input = val.to_string();
 
     let input_len = input.chars().count() + 10;
     let input_rows = ( input_len as u16) / cols;

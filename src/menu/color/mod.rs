@@ -19,26 +19,24 @@ pub fn menu(writer: &mut Stdout, settings: &mut Settings) -> Result<()> {
                                   settings.user_color,
                                   settings.duck_color);
 
-    let mut menu_input: String = String::new();
+    let mut menu_input: String;
 
     loop {
         menu_input = draw_menu(writer, &mode_menu_text).unwrap();
 
         match &menu_input[..] {
             "user" => { 
-                settings.user_color = color_menu(writer)?;
-                let feedback = format!("Your user color is now '{:?}'", settings.user_color);
+                settings.user_color = color_menu(writer, &settings.user_color)?;
+                let feedback = format!("Your user color is now '{:?}'\n[press enter]", settings.user_color);
                 draw_menu(writer, &feedback)?;
-                break;
             },
             "duck" => {
-                settings.duck_color = color_menu(writer)?;
-                let feedback = format!("Your duck color is now '{:?}'", settings.duck_color);
+                settings.duck_color = color_menu(writer, &settings.duck_color)?;
+                let feedback = format!("Your duck color is now '{:?}'\n[press enter]", settings.duck_color);
                 draw_menu(writer, &feedback)?;
-                break;
             },
             "quit" => { break; }
-            _ => { draw_menu(writer, "Invalid Input")?; },
+            _ => { draw_menu(writer, "Invalid Input\n[press enter]")?; },
         };
 
     }
@@ -48,7 +46,7 @@ pub fn menu(writer: &mut Stdout, settings: &mut Settings) -> Result<()> {
     Ok(())
 }
 
-pub fn color_menu(writer: &mut Stdout) -> Result<crossterm::style::Color> {
+pub fn color_menu(writer: &mut Stdout, previous_color: &crossterm::style::Color) -> Result<crossterm::style::Color> {
     let mode_menu_text = format!("Type one of the following colours\n\
                                   White    Black\n\
                                   Grey     DarkGrey\n\
@@ -60,15 +58,15 @@ pub fn color_menu(writer: &mut Stdout) -> Result<crossterm::style::Color> {
                                   Cyan     DarkCyan\n\n\
                                   type 'quit' to return to previous menu");
 
-    let mut menu_input: String = String::new();
-    let mut return_color = crossterm::style::Color::White;
+    let mut menu_input: String;
+    let mut return_color = *previous_color;
 
     loop {
         menu_input = draw_menu(writer, &mode_menu_text).unwrap();
         menu_input = menu_input.to_uppercase().split_whitespace().collect();
 
         match &menu_input[..] {
-            "quit"        => { break }
+            "QUIT"        => { break }
             "BLACK"       => { return_color = crossterm::style::Color::Black; break; }
             "DARKGREY"    => { return_color = crossterm::style::Color::DarkGrey; break; }
             "RED"         => { return_color = crossterm::style::Color::Red; break; }

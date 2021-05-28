@@ -23,7 +23,7 @@ fn main() -> Result<()> {
         terminal::SetTitle("Duck Chat")
     )?;
 
-    let mut message = Message::new("Welcome to Ducky Chat! (Type 'help' for information)", "Info", 'l', &Color::White);
+    let mut message = Message::new("Welcome to Ducky Chat! (Type 'menu' for configuration)", "Info", 'l', &Color::White);
     draw_message(&mut stdout, &message)?;
     stdout.flush()?;
 
@@ -33,9 +33,11 @@ fn main() -> Result<()> {
         stdout.flush()?;
         draw_input(&mut stdout, &mut input)?;
 
-        if input == "menu" {
+        if input == "quit" {
+            break
+        } else if input == "menu" {
             settings = config_menu(&mut stdout)?;
-            confy::store("ducky", &settings);
+            confy::store("ducky", &settings).unwrap();
             input = String::new();
         } else if settings.mode == "auto" {
         } else if input.starts_with(&settings.user_trig) {
@@ -44,9 +46,7 @@ fn main() -> Result<()> {
         } else if input.starts_with(&settings.duck_trig) {                 
             settings.mode = "duck".to_string();
             input = input.strip_prefix(&settings.duck_trig).unwrap().trim().to_string();
-        } else if input == "quit" {
-            break
-        }
+        } 
 
         if !input.trim().is_empty() {
             match &settings.mode[..] {

@@ -19,7 +19,7 @@ pub fn menu(writer: &mut Stdout, settings: &mut Settings) -> Result<()> {
                                   settings.user_name,
                                   settings.duck_name);
 
-    let mut menu_input: String = String::new();
+    let mut menu_input: String;
 
     loop {
         menu_input = draw_menu(writer, &mode_menu_text).unwrap();
@@ -27,18 +27,18 @@ pub fn menu(writer: &mut Stdout, settings: &mut Settings) -> Result<()> {
         match &menu_input[..] {
             "user" => { 
                 settings.user_name = draw_menu(writer, "Enter the name for 'user'")?;
-                let feedback = format!("Your user name is now '{}'", settings.user_name);
+                let feedback = format!("Your user name is now '{}'\n[press enter]", settings.user_name);
                 draw_menu(writer, &feedback)?;
                 break;
             },
             "duck" => {
                 settings.duck_name = draw_menu(writer, "Enter the name for 'duck'")?;
-                let feedback = format!("Your duck name is now '{}'", settings.duck_name);
+                let feedback = format!("Your duck name is now '{}'\n[press enter]", settings.duck_name);
                 draw_menu(writer, &feedback)?;
                 break;
             },
             "quit" => { break; }
-            _ => { draw_menu(writer, "Invalid Input")?; },
+            _ => { draw_menu(writer, "Invalid Input\n[press enter]")?; },
         };
 
     }

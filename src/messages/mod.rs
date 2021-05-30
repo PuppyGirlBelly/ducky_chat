@@ -39,13 +39,13 @@ impl Message {
         let (cols, rows) = terminal::size().unwrap();
 
         // Determine the maximum size of each box (60% of the screen)
-        let max_width: usize = ((cols/2) + (cols/10)).into();
+        let max_width: usize = ((cols/2) + (cols/5)).into();
         let text_width: usize = UnicodeWidthStr::width(&self.text[..]);
         let name_width: usize = self.user.chars().count() + 1;
 
         // If text is bigger than max width, wrap it into lines; and adjust hight and width
         if text_width > max_width {
-            textwrap::fill_inplace(&mut self.text, max_width);
+            self.text = textwrap::fill(&mut self.text, max_width);
             self.height = self.text.lines().count() as u16;
             self.width = max_width as u16; 
         } else if text_width > name_width { // Text is longer than name
@@ -66,8 +66,10 @@ impl Message {
         let box_top = format!(" {:▀<width$}▀\n", format!("{} ", self.user), width = self.width as usize);
         let box_bot = "▄".repeat((self.width as usize) + 2);
         let mut box_mid = "".to_string();
+
         for line in self.text.lines() {
-            let padding_size = (self.width as usize) - UnicodeWidthStr::width(line);
+            let text_size = UnicodeWidthStr::width(line);
+            let padding_size = (self.width as usize) - text_size;
             let padding = format!("{:width$}", "", width = padding_size);
             box_mid = format!("{} {}{} \n", &box_mid, line, padding);
         };

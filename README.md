@@ -1,5 +1,5 @@
 # Ducky_chat
 
-A serverless CLI chat client that communicates exclusively with a duck.
+A serverless (🤭) CLI-based chat client that communicates exclusively with a duck.
 
-WIP, and if you found this then what the heck are you looking at this for???
+It's a work in project and needs to have more comments and be cleaned up a bunch. But until then here it is for an early version of this project!
